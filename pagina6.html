@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+<meta charset="UTF-8">
+<title>Clientes - Rsplit</title>
+
+<style>
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, rgb(185, 202, 233), #2a5298, #6dd5fa);
+  color: white;
+  padding: 30px;
+}
+
+h1 {
+  text-align: center;
+}
+
+.subtitle {
+  text-align: center;
+  opacity: 0.8;
+  margin-bottom: 20px;
+}
+
+.container {
+  max-width: 800px;
+  margin: auto;
+}
+
+.card {
+  background: rgba(255,255,255,0.1);
+  padding: 20px;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  margin-bottom: 20px;
+}
+
+.card h3 {
+  margin-top: 0;
+}
+
+input, textarea {
+  width: 97%;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: none;
+}
+
+textarea {
+  resize: none;
+}
+
+.linha {
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  width: 100%;
+  margin-top: 15px;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: #ffffff30;
+  backdrop-filter: blur(5px);
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  transform: scale(1.02);
+}
+</style>
+
+</head>
+
+<body>
+
+<!-- ===== TELA INICIAL ===== -->
+<div id="telaInicial">
+  <h1>❄ Rsplit</h1>
+  <p class="subtitle">Clientes</p>
+
+  <button onclick="abrirCadastro()">Cadastrar Cliente</button>
+
+  <input type="text" id="busca" placeholder="Buscar cliente...">
+  <button onclick="buscarClientes()">Pesquisar</button>
+
+  <div id="resultadoBusca"></div>
+</div>
+
+<!-- ===== TELA CADASTRO ===== -->
+<div id="telaCadastro" style="display: none;">
+
+  <div class="container">
+
+    <h1>❄ Rsplit</h1>
+    <p class="subtitle">Cadastro de clientes</p>
+
+    <div class="card">
+      <h3>Cliente</h3>
+      <input type="text" id="nome" placeholder="Nome completo">
+      <input type="text" id="documento" placeholder="CPF ou CNPJ">
+      <input type="text" id="telefone" placeholder="Telefone">
+      <input type="number" id="clienteId" placeholder="ID do cliente">
+      <button onclick="buscarCliente()">Buscar Cliente</button>
+    </div>
+
+    <div class="card">
+      <h3>Endereço</h3>
+      <input type="text" id="cep" placeholder="CEP">
+
+      <div class="linha">
+        <input type="text" id="rua" placeholder="Rua">
+        <input type="text" id="bairro" placeholder="Bairro">
+      </div>
+
+      <div class="linha">
+        <input type="text" id="cidade" placeholder="Cidade">
+        <input type="text" id="estado" placeholder="UF">
+      </div>
+
+      <input type="text" id="numero" placeholder="Número">
+    </div>
+
+    <div class="card">
+      <h3>Observação</h3>
+      <textarea id="obs" placeholder="Detalhes adicionais"></textarea>
+    </div>
+
+    <button onclick="salvarCliente()">Salvar Cliente</button>
+    <button onclick="voltarInicio()">Voltar</button>
+
+  </div>
+</div>
+
+<script>
+
+// ===== BUSCA =====
+window.buscarClientes = async function () {
+  const termo = document.getElementById('busca').value
+
+  const { data, error } = await supabase
+    .from('clientes')
+    .select('*')
+    .ilike('nome', `%${termo}%`)
+
+  if (error) {
+    console.error(error)
+    return
+  }
+
+  const container = document.getElementById('resultadoBusca')
+  container.innerHTML = ''
+
+  data.forEach(cliente => {
+    const div = document.createElement('div')
+    div.style.cursor = 'pointer'
+    div.style.marginTop = '10px'
+
+    div.innerText = `${cliente.nome} - ${cliente.telefone}`
+
+    div.onclick = () => {
+  abrirCadastro()
+  preencherCliente(cliente)
+}
+
+    container.appendChild(div)
+  })
+}
+
+function preencherCliente(cliente) {
+  document.getElementById('nome').value = cliente.nome || ''
+  document.getElementById('telefone').value = cliente.telefone || ''
+  document.getElementById('documento').value = cliente.documento || ''
+  document.getElementById('rua').value = cliente.rua || ''
+  document.getElementById('bairro').value = cliente.bairro || ''
+  document.getElementById('cidade').value = cliente.cidade || ''
+  document.getElementById('estado').value = cliente.estado || ''
+  document.getElementById('numero').value = cliente.numero || ''
+  document.getElementById('obs').value = cliente.obs || ''
+}
+
+// ===== FORMATA CPF/CNPJ =====
+const inputDoc = document.getElementById('documento');
+
+inputDoc.addEventListener('input', () => {
+  let valor = inputDoc.value.replace(/\D/g, '');
+
+  if (valor.length <= 11) {
+    valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+    valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+    valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+  } else {
+    valor = valor.replace(/^(\d{2})(\d)/, '$1.$2');
+    valor = valor.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+    valor = valor.replace(/\.(\d{3})(\d)/, '.$1/$2');
+    valor = valor.replace(/(\d{4})(\d)/, '$1-$2');
+  }
+
+  inputDoc.value = valor;
+});
+
+// ===== CEP =====
+const cepInput = document.getElementById('cep');
+
+cepInput.addEventListener('input', () => {
+  let valor = cepInput.value.replace(/\D/g, '');
+  valor = valor.replace(/(\d{5})(\d)/, '$1-$2');
+  cepInput.value = valor;
+});
+
+cepInput.addEventListener('blur', () => {
+  const cep = cepInput.value.replace(/\D/g, '');
+
+  if (cep.length !== 8) return;
+
+  fetch(`https://viacep.com.br/ws/${cep}/json/`)
+    .then(res => res.json())
+    .then(dados => {
+      if (dados.erro) {
+        alert('CEP não encontrado');
+        return;
+      }
+
+      document.getElementById('rua').value = dados.logradouro;
+      document.getElementById('cidade').value = dados.localidade;
+      document.getElementById('estado').value = dados.uf;
+      document.getElementById('bairro').value = dados.bairro;
+    });
+});
+
+// ===== NAVEGAÇÃO =====
+function abrirCadastro() {
+  document.getElementById('telaInicial').style.display = 'none'
+  document.getElementById('telaCadastro').style.display = 'block'
+}
+
+function voltarInicio() {
+  document.getElementById('telaCadastro').style.display = 'none'
+  document.getElementById('telaInicial').style.display = 'block'
+}
+
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+window.supabase = createClient(
+  'https://vkktcnvnskjdjfohrrak.supabase.co',
+  'sb_publishable_z5v7QHkgXjELS2JM3sEfzg_GKEVocPX'
+)
+
+window.salvarCliente = async function () {
+  const nome = document.getElementById('nome').value
+  const telefone = document.getElementById('telefone').value
+  const documento = document.getElementById('documento').value
+  const rua = document.getElementById('rua').value
+  const numero = document.getElementById('numero').value
+  const bairro = document.getElementById('bairro').value
+  const cidade = document.getElementById('cidade').value
+  const estado = document.getElementById('estado').value
+  const obs = document.getElementById('obs').value
+
+  const cliente = {
+    nome,
+    telefone,
+    documento,
+    rua,
+    numero,
+    bairro,
+    cidade,
+    estado,
+    obs
+  }
+
+  const { data, error } = await supabase
+    .from('clientes')
+    .insert([cliente])
+    .select()
+
+  if (error) {
+    console.error(error)
+    alert('Erro ao salvar cliente')
+  } else {
+    alert('Cliente salvo! Ficha nº: ' + data[0].id)
+  }
+}
+</script>
+
+</body>
+</html>
