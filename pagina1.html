@@ -6,6 +6,28 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
 
+  <script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+const supabase = createClient(
+  'https://vkktcnvnskjdjfohrrak.supabase.co',
+  'sb_publishable_z5v7QHkgXjELS2JM3sEfzg_GKEVocPX'
+)
+
+// TESTE: salvar um cliente
+async function salvarCliente() {
+  const { data, error } = await supabase
+    .from('clientes')
+    .insert([
+      { nome: 'Teste', telefone: '123', email: 'teste@test.com' }
+    ])
+
+  console.log(data, error)
+}
+
+salvarCliente()
+</script>
+
   <style>
     body {
       margin: 0;
@@ -137,20 +159,35 @@
       document.getElementById('total').innerText = total.toFixed(2);
     }
 
-    function salvarOrcamento() {
-      fetch('http://localhost:3000/salvar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nome: 'orcamento',
-          conteudo: JSON.stringify(itens)
-        })
-      })
-      .then(res => res.json())
-      .then(() => {
-        alert('Orçamento salvo!');
-      });
-    }
+    //salvar orçamento
+    async function salvarOrcamento() {
+  const { data, error } = await supabase
+    .from('orcamentos')
+    .insert([
+      {
+        nome: 'orcamento',
+        itens: itens
+      }
+    ])
+
+  if (error) {
+    console.error(error)
+    alert('Erro ao salvar')
+  } else {
+    alert('Orçamento salvo!')
+  }
+}
+
+//salvar cliente
+async function salvarCliente(nome, telefone, email, uf, cidade, número, rua, cpf, telefone) {
+  const { error } = await supabase
+    .from('clientes')
+    .insert([{ nome, telefone, email, uf, cidade, número, rua, cpf, telefone }])
+
+  if (error) {
+    console.error(error)
+  }
+}
 
     function proximo() {
       const dados = {
