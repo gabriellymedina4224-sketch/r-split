@@ -88,6 +88,8 @@ button:hover {
     <input type="text" id="nome" placeholder="Nome completo">
     <input type="text" id="documento" placeholder="CPF ou CNPJ">
     <input type="text" id="telefone" placeholder="Telefone">
+    <input type="number" id="clienteId" placeholder="ID do cliente">
+<button onclick="buscarCliente()">Buscar Cliente</button>
   </div>
 
   <div class="card">
@@ -96,7 +98,7 @@ button:hover {
 
     <div class="linha">
        <input type="text" id="rua" placeholder="Rua">
-       <input typw="text" id="bairro" placeholder="Bairro">
+       <input type="text" id="bairro" placeholder="Bairro">
     </div>
 
     <div class="linha">
@@ -128,6 +130,38 @@ window.supabase = createClient(
 </script>
 
 <script>
+
+window.buscarCliente = async function () {
+    const id = document.getElementById('clienteId').value
+
+    if (!id) {
+      alert('Digite um ID')
+      return
+    }
+
+    const { data, error } = await window.supabase
+      .from('clientes')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (error) {
+      console.error(error)
+      alert('Cliente não encontrado')
+      return
+    }
+
+    document.getElementById('nome').value = data.nome || ''
+    document.getElementById('telefone').value = data.telefone || ''
+    document.getElementById('documento').value = data.documento || ''
+    document.getElementById('rua').value = data.rua || ''
+    document.getElementById('bairro').value = data.bairro || ''
+    document.getElementById('cidade').value = data.cidade || ''
+    document.getElementById('estado').value = data.estado || ''
+    document.getElementById('numero').value = data.numero || ''
+    document.getElementById('obs').value = data.obs || ''
+    document.getElementById('cep').value = data.cep || ''
+  }
 
 // ===== FORMATA CPF/CNPJ =====
 const inputDoc = document.getElementById('documento');
@@ -242,6 +276,7 @@ function gerarPDF() {
   const estado = document.getElementById('estado').value;
   const numero = document.getElementById('numero').value;
   const obs = document.getElementById('obs').value;
+  const cep = document.getElementById('cep').value;
   
   const cliente = {
   nome,
@@ -252,7 +287,8 @@ function gerarPDF() {
   bairro,
   cidade,
   estado,
-  obs
+  obs,
+  cep
 }
 
   let y = 40;
