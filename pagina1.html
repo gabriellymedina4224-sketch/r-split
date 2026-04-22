@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Orçamento - Rsplit</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, rgb(185, 202, 233), #2a5298, #6dd5fa);
+      color: white;
+      padding: 30px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.1);
+      padding: 20px;
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 98%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: none;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    .item {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      background: rgba(255,255,255,0.2);
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .total {
+      font-size: 20px;
+      text-align: right;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>📊 Orçamento</h1>
+
+    <h2>Equipamento</h2>
+<input type="text" id="equipamento">
+
+<h3>Serviço</h3>
+<input type="text" id="descricao" placeholder="Descrição">
+<input type="number" id="valor" placeholder="Valor">
+
+<button onclick="adicionarItem()">Adicionar</button>
+
+<ul id="lista"></ul>
+
+<h3>Total: R$ <span id="total">0</span></h3>
+
+<button onclick="proximo()">Continuar</button>
+
+    <button onclick="salvarOrcamento()">Salvar Orçamento</button>
+    <button onclick="voltar()">Voltar</button>
+  </div>
+
+  <script>
+    let itens = [];
+
+    function adicionarItem() {
+      const descricao = document.getElementById('descricao').value;
+      const valor = parseFloat(document.getElementById('valor').value);
+      const equipamento = document.getElementById('equipamento').value;
+      if (!descricao || !valor) return;
+
+      itens.push({ descricao, valor, equipamento });
+
+      atualizarTela();
+
+      document.getElementById('descricao').value = '';
+      document.getElementById('valor').value = '';
+      document.getElementById('equipamento').value = '';
+    }
+
+    function atualizarTela() {
+      const lista = document.getElementById('lista');
+      lista.innerHTML = '';
+
+      let total = 0;
+
+      itens.forEach(item => {
+  total += item.valor;
+
+  const div = document.createElement('div');
+  div.className = 'item';
+  div.innerHTML = `
+    <span>${item.equipamento}</span>
+    <span>${item.descricao}</span>
+    <span>R$ ${item.valor.toFixed(2)}</span>
+  `;
+
+  lista.appendChild(div);
+});
+
+      document.getElementById('total').innerText = total.toFixed(2);
+    }
+
+    function salvarOrcamento() {
+      fetch('http://localhost:3000/salvar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: 'orcamento',
+          conteudo: JSON.stringify(itens)
+        })
+      })
+      .then(res => res.json())
+      .then(() => {
+        alert('Orçamento salvo!');
+      });
+    }
+
+    function proximo() {
+      const dados = {
+      itens
+    };
+
+  localStorage.setItem('orcamento', JSON.stringify(dados));
+
+  window.location.href = 'cliente.html';
+}
+
+    function voltar() {
+      window.location.href = 'index.html';
+    }
+  </script>
+
+</body>
+</html>

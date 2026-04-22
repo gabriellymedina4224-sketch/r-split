@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>PMOC - Ficha Técnica</title>
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, rgb(185, 202, 233), #2a5298, #6dd5fa);
+      color: white;
+      padding: 30px;
+    }
+
+    input {
+      margin: 5px;
+      padding: 5px;
+    }
+
+    button {
+      padding: 6px 10px;
+      margin: 5px;
+      cursor: pointer;
+    }
+
+    .card {
+      border: 1px solid #ccc;
+      background: white;
+      padding: 10px;
+      margin: 5px 0;
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="pagina2">
+
+  <h1>Ficha Técnica / PMOC</h1>
+
+  <!-- EMPRESA -->
+  <h2>Empresa</h2>
+  <input placeholder="Nome da empresa" id="empresa"><br>
+  <input placeholder="CNPJ" id="cnpj"><br>
+  <input placeholder="Endereço" id="endereco"><br>
+
+  <!-- CONTRATO -->
+  <h2>Contrato</h2>
+  <input placeholder="Número do contrato" id="contratoNumero"><br>
+  <input placeholder="Responsável técnico" id="responsavel"><br>
+
+  <label>Data início</label><br>
+  <input type="date" id="dataInicio"><br>
+
+  <label>Validade</label><br>
+  <input type="date" id="dataValidade"><br>
+
+  <!-- EQUIPAMENTOS -->
+  <h2>Equipamentos</h2>
+
+  <input placeholder="Marca" id="marca">
+  <input placeholder="Local" id="local">
+  <input placeholder="BTUs" id="btus">
+
+  <button onclick="addEquipamentoTemp()">Adicionar</button>
+
+  <h3>Lista de equipamentos</h3>
+  <div id="listaTempEquipamentos"></div>
+
+  <br>
+
+  <button onclick="salvarCliente()">Salvar e continuar</button>
+
+</div>
+
+<script>
+
+let clientes = [];
+let equipamentosTemp = [];
+
+function addEquipamentoTemp() {
+  const marca = document.getElementById('marca').value;
+  const local = document.getElementById('local').value;
+  const btus = document.getElementById('btus').value;
+
+  if (!marca || !local || !btus) {
+    alert("Preenche tudo direito antes de adicionar.");
+    return;
+  }
+
+  const equipamento = {
+    marca,
+    local,
+    btus,
+    atividades: {
+      mensal: [],
+      trimestral: [],
+      semestral: []
+    }
+  };
+
+  equipamentosTemp.push(equipamento);
+
+  renderTempEquipamentos();
+
+  document.getElementById('marca').value = "";
+  document.getElementById('local').value = "";
+  document.getElementById('btus').value = "";
+}
+
+function renderTempEquipamentos() {
+  const div = document.getElementById('listaTempEquipamentos');
+  div.innerHTML = "";
+
+  equipamentosTemp.forEach((eq, index) => {
+    div.innerHTML += `
+      <div class="card">
+        <strong>${eq.marca}</strong> - ${eq.local} - ${eq.btus} BTU
+        <br>
+        <button onclick="removerEquipamento(${index})">Remover</button>
+      </div>
+    `;
+  });
+}
+
+function removerEquipamento(index) {
+  equipamentosTemp.splice(index, 1);
+  renderTempEquipamentos();
+}
+
+function salvarCliente() {
+  const empresa = document.getElementById('empresa').value;
+  const cnpj = document.getElementById('cnpj').value;
+  const endereco = document.getElementById('endereco').value;
+
+  const contratoNumero = document.getElementById('contratoNumero').value;
+  const responsavel = document.getElementById('responsavel').value;
+  const dataInicio = document.getElementById('dataInicio').value;
+  const dataValidade = document.getElementById('dataValidade').value;
+
+  if (!empresa || equipamentosTemp.length === 0) {
+    alert("Precisa de empresa e pelo menos um equipamento.");
+    return;
+  }
+
+  const cliente = {
+    empresa,
+    cnpj,
+    endereco,
+    contrato: {
+      numero: contratoNumero,
+      responsavel,
+      inicio: dataInicio,
+      validade: dataValidade
+    },
+    equipamentos: [...equipamentosTemp]
+  };
+
+  clientes.push(cliente);
+
+  console.log(clientes);
+
+  // limpar tudo
+  equipamentosTemp = [];
+  document.getElementById('listaTempEquipamentos').innerHTML = "";
+
+  document.getElementById('empresa').value = "";
+  document.getElementById('cnpj').value = "";
+  document.getElementById('endereco').value = "";
+  document.getElementById('contratoNumero').value = "";
+  document.getElementById('responsavel').value = "";
+  document.getElementById('dataInicio').value = "";
+  document.getElementById('dataValidade').value = "";
+
+  alert("Salvo. Agora vai pra próxima etapa.");
+}
+
+</script>
+
+</body>
+</html>
