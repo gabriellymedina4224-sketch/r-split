@@ -93,7 +93,11 @@ button:hover {
   <div class="card">
     <h3>Endereço</h3>
     <input type="text" id="cep" placeholder="CEP">
-    <input type="text" id="rua" placeholder="Rua">
+
+    <div class="linha">
+       <input type="text" id="rua" placeholder="Rua">
+       <input typw="text" id="bairro" placeholder="Bairro">
+    </div>
 
     <div class="linha">
       <input type="text" id="cidade" placeholder="Cidade">
@@ -113,6 +117,15 @@ button:hover {
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+window.supabase = createClient(
+  'https://vkktcnvnskjdjfohrrak.supabase.co',
+  'sb_publishable_z5v7QHkgXjELS2JM3sEfzg_GKEVocPX'
+)
+</script>
 
 <script>
 
@@ -161,8 +174,23 @@ cepInput.addEventListener('blur', () => {
       document.getElementById('rua').value = dados.logradouro;
       document.getElementById('cidade').value = dados.localidade;
       document.getElementById('estado').value = dados.uf;
+      document.getElementById('bairro').value = dados.bairro;
     });
 });
+
+//salvar dados
+async function salvarCliente(dados) {
+  const { error } = await window.supabase
+    .from('clientes')
+    .insert([dados])
+
+  if (error) {
+    console.error('Erro ao salvar:', error)
+    alert('Erro ao salvar cliente')
+  } else {
+    console.log('Cliente salvo')
+  }
+}
 
 // ===== GERAR PDF =====
 function gerarPDF() {
@@ -209,10 +237,23 @@ function gerarPDF() {
   const docCliente = document.getElementById('documento').value;
   const telefone = document.getElementById('telefone').value;
   const rua = document.getElementById('rua').value;
+  const bairro = document.getElementById('bairro').value;
   const cidade = document.getElementById('cidade').value;
   const estado = document.getElementById('estado').value;
   const numero = document.getElementById('numero').value;
   const obs = document.getElementById('obs').value;
+  
+  const cliente = {
+  nome,
+  telefone,
+  documento: docCliente,
+  rua,
+  numero,
+  bairro,
+  cidade,
+  estado,
+  obs
+}
 
   let y = 40;
 
@@ -233,7 +274,7 @@ function gerarPDF() {
   doc.text(`Documento: ${docCliente}`, 10, y);
   y += 6;
 
-  doc.text(`Endereço: ${rua}, ${numero}`, 10, y);
+  doc.text(`Endereço: ${rua}, ${numero}, ${bairro}`, 10, y);
   y += 6;
 
   doc.text(`${cidade} - ${estado}`, 10, y);
@@ -292,6 +333,7 @@ function gerarPDF() {
   doc.setFontSize(14);
   doc.addImage(logo2, "PNG", 180, 275, 15, 15);
 
+  salvarCliente(cliente)
   doc.save(`orcamento_${nome || "cliente"}.pdf`);
 }
 
