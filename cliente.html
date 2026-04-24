@@ -330,7 +330,7 @@ function gerarPDF() {
 
   dados.itens.forEach(item => {
     doc.text(item.equipamento, 10, y);
-    doc.text(item.descricao, 130, y);
+    doc.text(item.descricao, 100, y);
     doc.text(`R$ ${item.valor}`, 185, y);
     total += item.valor;
     y += 6;
