@@ -329,29 +329,36 @@ function gerarPDF() {
   let total = 0;
 
   dados.itens.forEach(item => {
-    doc.text(item.equipamento, 10, y);
-    doc.text(item.descricao, 50, y);
-    doc.text(
-      item.valor.toLocaleString('pt-BR', {
+  doc.text(item.equipamento, 10, y);
+  doc.text(item.descricao, 50, y);
+
+  doc.text(
+    item.valor.toLocaleString('pt-BR', {
       style: 'currency',
       currency: 'BRL'
     }),
-    185,
-    y
+    200,
+    y,
+    { align: 'right' }
   );
 
-  // ===== TOTAL DESTACADO =====
-  y += 10;
+  total += item.valor;
+  y += 6;
+}); // ← FECHAMENTO QUE TU ESQUECEU
 
-  doc.setFillColor(230, 240, 255);
-  doc.rect(10, y - 5, 190, 10, "F");
+// ===== TOTAL DESTACADO =====
+y += 10;
 
-  doc.setFontSize(12);
-  doc.setTextColor(0, 0, 0);
-  doc.text(`TOTAL: ${total.toLocaleString('pt-BR', {
+doc.setFillColor(230, 240, 255);
+doc.rect(10, y - 5, 190, 10, "F");
+
+doc.setFontSize(12);
+doc.setTextColor(0, 0, 0);
+
+doc.text(`TOTAL: ${total.toLocaleString('pt-BR', {
   style: 'currency',
   currency: 'BRL'
-})}`
+})}`, 10, y);
 
   // ===== OBS =====
   if (obs) {
