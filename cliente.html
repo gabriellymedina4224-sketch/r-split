@@ -331,10 +331,14 @@ function gerarPDF() {
   dados.itens.forEach(item => {
     doc.text(item.equipamento, 10, y);
     doc.text(item.descricao, 50, y);
-    doc.text(`R$ ${item.valor}`, 185, y);
-    total += item.valor;
-    y += 6;
-  });
+    doc.text(
+      item.valor.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }),
+    185,
+    y
+  );
 
   // ===== TOTAL DESTACADO =====
   y += 10;
@@ -344,7 +348,10 @@ function gerarPDF() {
 
   doc.setFontSize(12);
   doc.setTextColor(0, 0, 0);
-  doc.text(`TOTAL: R$ ${total.toFixed(2)}`, 10, y);
+  doc.text(`TOTAL: ${total.toLocaleString('pt-BR', {
+  style: 'currency',
+  currency: 'BRL'
+})}`
 
   // ===== OBS =====
   if (obs) {
